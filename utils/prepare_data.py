@@ -1,12 +1,14 @@
 import os
 import gzip
 import json
+import nltk
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-WORKING_DIR = '/mnt/E/Projects/Content-based-Neural-Recommender-Systems/'
-DATA_DIR = f'{WORKING_DIR}data/zen/'
+
+HOME_DIR = os.environ['HOME_DIR']
+DATA_DIR = f'{HOME_DIR}data/zen/'
 
 
 def utf8_preview(d):
@@ -62,6 +64,26 @@ def get_zen_data(train_size=0.8):
     users_train_df = pd.DataFrame(users_train_df)
     users_test_df = pd.DataFrame(users_test_df)
     return items_df, (users_train_df, users_test_df)
+
+from gensim.models.doc2vec import TaggedDocument
+tokenizer = nltk.tokenize.WordPunctTokenizer()
+
+
+def tokenize(text):
+    return [t for t in tokenizer.tokenize(text.lower()) if len(t) >= 2]
+
+
+class zen_text_iterator:
+    def __init__(self, sampling_rate=1.0):
+        self.sampling_rate = sampling_rate
+
+    def __iter__(self):
+        for line in gzip.GzipFile(f"{DATA_DIR}items.json.gz", "r"):
+            if np.random.random() > self.sampling_rate:
+                continue
+            j = json.loads(line)
+            text = j["title"] + " " + j["content"]
+            yield TaggedDocument(tokenize(text), [j["itemId"]])
 
 
 if __name__ == "__main__":
