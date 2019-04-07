@@ -1,0 +1,1 @@
+{'factors': 30, 'regularization': 0.0001, 'iterations': 20, 'calculate_training_loss': True, 'elapsed_time': 75.81137132644653, 'loss': 0.7600182570173307}
