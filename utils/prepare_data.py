@@ -30,6 +30,7 @@ def split_ratings(user_items, user_ratings, train_size=0.8):
     return list(zip(*user_feedback_train)), list(zip(*user_feedback_test))
 
 
+image_size = 96
 def get_zen_data(train_size=0.8):
     # load items
     items_df = []
@@ -37,6 +38,8 @@ def get_zen_data(train_size=0.8):
         j = json.loads(line)
         j["content"] = j["content"].encode("utf8")  # storing in utf8 saves RAM
         j["title"] = j["title"].encode("utf8")
+        if np.isnan(j["image"]).any():
+            j["image"] = [0]*image_size
         items_df.append(j)
     items_df = pd.DataFrame(items_df).apply(utf8_preview)
 
@@ -64,6 +67,7 @@ def get_zen_data(train_size=0.8):
     users_train_df = pd.DataFrame(users_train_df)
     users_test_df = pd.DataFrame(users_test_df)
     return items_df, (users_train_df, users_test_df)
+
 
 from gensim.models.doc2vec import TaggedDocument
 tokenizer = nltk.tokenize.WordPunctTokenizer()
