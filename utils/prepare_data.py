@@ -5,10 +5,13 @@ import nltk
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+from gensim.models.doc2vec import TaggedDocument
 
+tokenizer = nltk.tokenize.WordPunctTokenizer()
 
 HOME_DIR = os.environ['HOME_DIR']
 DATA_DIR = f'{HOME_DIR}data/zen/'
+ZEN_IMAGE_SIZE = 96
 
 
 def utf8_preview(d):
@@ -30,65 +33,84 @@ def split_ratings(user_items, user_ratings, train_size=0.8):
     return list(zip(*user_feedback_train)), list(zip(*user_feedback_test))
 
 
-image_size = 96
-def get_zen_data(train_size=0.8):
-    # load items
-    items_df = []
-    for line in tqdm(gzip.GzipFile(f"{DATA_DIR}items.json.gz", "r"), 'loading items'):
-        j = json.loads(line)
-        j["content"] = j["content"].encode("utf8")  # storing in utf8 saves RAM
-        j["title"] = j["title"].encode("utf8")
-        if np.isnan(j["image"]).any():
-            j["image"] = [0]*image_size
-        items_df.append(j)
-    items_df = pd.DataFrame(items_df).apply(utf8_preview)
+class zen:
+    train_size = 0.8
 
-    # load users and split on train and test
-    users_train_df, users_test_df = [], []
-    for line in tqdm(gzip.GzipFile(f"{DATA_DIR}train.json.gz", "r"), 'loading users'):
-        j = json.loads(line)
-        user_items = []
-        user_ratings = []
-        for item, rating in j["trainRatings"].items():
-            user_items.append(int(item))
-            user_ratings.append(int(rating))
-
-        user_train, user_test = split_ratings(user_items, user_ratings)
-        users_train_df.append({
-            'userId': j["userId"],
-            'userItems': np.array(user_train[0]),
-            'userRatings': np.array(user_train[1]),
-        })
-        users_test_df.append({
-            'userId': j["userId"],
-            'userItems': np.array(user_test[0]),
-            'userRatings': np.array(user_test[1]),
-        })
-    users_train_df = pd.DataFrame(users_train_df)
-    users_test_df = pd.DataFrame(users_test_df)
-    return items_df, (users_train_df, users_test_df)
-
-
-from gensim.models.doc2vec import TaggedDocument
-tokenizer = nltk.tokenize.WordPunctTokenizer()
-
-
-def tokenize(text):
-    return [t for t in tokenizer.tokenize(text.lower()) if len(t) >= 2]
-
-
-class zen_text_iterator:
-    def __init__(self, sampling_rate=1.0):
-        self.sampling_rate = sampling_rate
-
-    def __iter__(self):
-        for line in gzip.GzipFile(f"{DATA_DIR}items.json.gz", "r"):
-            if np.random.random() > self.sampling_rate:
-                continue
+    @staticmethod
+    def items():
+        for line in tqdm(gzip.GzipFile(f"{DATA_DIR}items.json.gz", "r"), 'loading items'):
             j = json.loads(line)
-            text = j["title"] + " " + j["content"]
-            yield TaggedDocument(tokenize(text), [j["itemId"]])
+            j["content"] = j["content"].encode("utf8")  # storing in utf8 saves RAM
+            j["title"] = j["title"].encode("utf8")
+            if np.isnan(j["image"]).any():
+                j["image"] = [0] * ZEN_IMAGE_SIZE
+            yield i
+
+    @staticmethod
+    def items_df():
+        return pd.DataFrame(zen.items())
+
+    @staticmethod
+    def users():
+        for line in tqdm(gzip.GzipFile(f"{DATA_DIR}train.json.gz", "r"), 'loading users'):
+            j = json.loads(line)
+            user_items = []
+            user_ratings = []
+            for item, rating in j["trainRatings"].items():
+                user_items.append(int(item))
+                user_ratings.append(int(rating))
+
+            yield {
+                'userId': j["userId"],
+                'userItems': np.array(user_items),
+                'userRatings': np.array(user_ratings),
+            }
+
+    @staticmethod
+    def users_df():
+        return pd.DataFrame(zen.users())
+
+    @staticmethod
+    def __split_user(user):
+        user_train, user_test = split_ratings(user['userItems'], user['userRatings'], zen.train_size)
+        return {'userId': user["userId"],
+                'userItems': np.array(user_train[0]),
+                'userRatings': np.array(user_train[1])}, \
+               {'userId': user["userId"],
+                'userItems': np.array(user_test[0]),
+                'userRatings': np.array(user_test[1])}
+
+    @staticmethod
+    def zen_data():
+        # load items
+        items_df = zen.items()
+
+        # load users and split on train and test
+        users_train_df, users_test_df = zip(*map(zen.__split_user, zen.users()))
+        users_train_df = pd.DataFrame(users_train_df)
+        users_test_df = pd.DataFrame(users_test_df)
+        return items_df, (users_train_df, users_test_df)
+
+    @staticmethod
+    def __tokenize(text):
+        return [t for t in tokenizer.tokenize(text.lower()) if len(t) >= 2]
+
+    class text_iterator:
+        def __init__(self, sampling_rate=1.0, title=True, content=True):
+            self.sampling_rate = sampling_rate
+            self.title = title
+            self.content = content
+            if not title * content:
+                raise AttributeError("title and content can't be False at the same time")
+
+        def __iter__(self):
+            for line in gzip.GzipFile(f"{DATA_DIR}items.json.gz", "r"):
+                if np.random.random() > self.sampling_rate:
+                    continue
+                j = json.loads(line)
+                text = "{} {}".format(j["title"] if self.title else "", j["content"] if self.content else "")
+                yield TaggedDocument(zen.tokenize(text), [j["itemId"]])
 
 
 if __name__ == "__main__":
-    items_df, (train_df, test_df) = get_zen_data()
+# items_df, (train_df, test_df) = get_zen_data()
