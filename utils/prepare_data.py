@@ -44,11 +44,11 @@ class zen:
             j["title"] = j["title"].encode("utf8")
             if np.isnan(j["image"]).any():
                 j["image"] = [0] * ZEN_IMAGE_SIZE
-            yield i
+            yield j
 
     @staticmethod
     def items_df():
-        return pd.DataFrame(zen.items())
+        return pd.DataFrame(zen.items()).apply(utf8_preview)
 
     @staticmethod
     def users():
@@ -113,4 +113,5 @@ class zen:
 
 
 if __name__ == "__main__":
-# items_df, (train_df, test_df) = get_zen_data()
+    pass
+    # items_df, (train_df, test_df) = get_zen_data()
