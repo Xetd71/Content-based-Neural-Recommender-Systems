@@ -81,7 +81,7 @@ class zen:
                 'userRatings': np.array(user_test[1])}
 
     @staticmethod
-    def zen_data():
+    def data():
         # load items
         items_df = zen.items()
 
