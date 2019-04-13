@@ -13,6 +13,8 @@ HOME_DIR = os.environ['HOME_DIR']
 DATA_DIR = f'{HOME_DIR}data/zen/'
 ZEN_IMAGE_SIZE = 96
 
+def tokenize(text):
+        return [t for t in tokenizer.tokenize(text.lower()) if len(t) >= 2]
 
 def utf8_preview(d):
     try:
@@ -91,13 +93,8 @@ class zen:
         users_test_df = pd.DataFrame(users_test_df)
         return items_df, (users_train_df, users_test_df)
 
-    @staticmethod
-    def __tokenize(text):
-        return [t for t in tokenizer.tokenize(text.lower()) if len(t) >= 2]
-
     class text_iterator:
-        def __init__(self, sampling_rate=1.0, title=True, content=True):
-            self.sampling_rate = sampling_rate
+        def __init__(self, title=True, content=True):
             self.title = title
             self.content = content
             if not title * content:
@@ -105,11 +102,9 @@ class zen:
 
         def __iter__(self):
             for line in gzip.GzipFile(f"{DATA_DIR}items.json.gz", "r"):
-                if np.random.random() > self.sampling_rate:
-                    continue
                 j = json.loads(line)
                 text = "{} {}".format(j["title"] if self.title else "", j["content"] if self.content else "")
-                yield TaggedDocument(zen.tokenize(text), [j["itemId"]])
+                yield TaggedDocument(tokenize(text), [j["itemId"]])
 
 
 if __name__ == "__main__":
