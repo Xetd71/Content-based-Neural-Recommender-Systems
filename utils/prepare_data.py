@@ -73,6 +73,11 @@ class zen:
         return pd.DataFrame(zen.users())
 
     @staticmethod
+    def user_items():
+        return pd.DataFrame(list(map(lambda user: user['userItems'][user['userRatings'] == 1], zen.users())))
+
+
+    @staticmethod
     def __split_user(user):
         user_train, user_test = split_ratings(user['userItems'], user['userRatings'], zen.train_size)
         return {'userId': user["userId"],
