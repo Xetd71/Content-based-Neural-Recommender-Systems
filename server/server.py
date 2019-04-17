@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from flask import Flask
 from flask import jsonify
+from flask import json
 
 app = Flask(__name__)
 
@@ -21,7 +22,7 @@ PREPROC_DIR = f'{DATA_DIR}preproc/'
 
 
 items_df = zen.items_df()
-user_items = zen.user_items()
+user_items = zen.user_items(50)
 
 
 @app.route('/')
@@ -31,8 +32,8 @@ def hello_world():
 
 @app.route('/user_items/<user_id>')
 def show_user_items(user_id):
-    items = items_df.iloc[user_items[user_id]]
-    return jsonify(items)
+    items = items_df.iloc[user_items[int(user_id)]].to_json(orient='records')
+    return jsonify(json.loads(items))
 
 
 # @app.route('/als/<user_id>')

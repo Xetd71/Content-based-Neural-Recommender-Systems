@@ -73,9 +73,14 @@ class zen:
         return pd.DataFrame(zen.users())
 
     @staticmethod
-    def user_items():
-        return pd.DataFrame(list(map(lambda user: user['userItems'][user['userRatings'] == 1], zen.users())))
-
+    def user_items(n=None, shuffle=True):
+        if shuffle:
+            def select_func(user):
+                items = user['userItems'][user['userRatings'] == 1]
+                np.random.shuffle(items)
+                return items[:n]
+            return list(map(select_func, zen.users()))
+        return list(map(lambda user: user['userItems'][user['userRatings'] == 1][:n], zen.users()))
 
     @staticmethod
     def __split_user(user):
