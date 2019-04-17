@@ -1,4 +1,5 @@
-import { USER_ID_CHANGED, ALGORITHM_CHANGED } from "../types";
+import { api }  from '../api'
+import { USER_ID_CHANGED, ALGORITHM_CHANGED, USER_ITEMS_ISSUED, USER_RECOMMENDATION_ISSUED } from "../types";
 
 export const userIdChanged = userId => ({
    type: USER_ID_CHANGED,
@@ -10,5 +11,22 @@ export const algorithmChanged = algorithm => ({
     algorithm
 });
 
-export const setUserId = (userId) => dispatch => dispatch(userIdChanged(userId));
-export const setAlgorithm = (algorithm) => dispatch => dispatch(algorithmChanged(algorithm));
+export const userItemsIssued = userItems => ({
+   type: USER_ITEMS_ISSUED,
+    userItems
+});
+
+export const userRecommendarionIssued = recommendedItems => ({
+    type: USER_RECOMMENDATION_ISSUED,
+    recommendedItems
+});
+
+export const setUserId = (userId) => dispatch => {
+    dispatch(userIdChanged(userId));
+    api.getUserItems(userId).then(userItems =>  dispatch(userItemsIssued(userItems)));
+};
+export const setAlgorithm = (userId, algorithm) => dispatch => {
+    dispatch(algorithmChanged(algorithm));
+    // api.getRecommendation(userId, algorithm).then(
+    //     recommendedItems => dispatch(userRecommendarionIssued(recommendedItems)));
+};

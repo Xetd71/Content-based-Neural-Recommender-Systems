@@ -1,9 +1,17 @@
 import React from 'react';
+import { connect } from 'react-redux';
+import ItemsList from '../controls/ItemsList'
 
-const RecommendedItemsPage = () => (
-    <div>
-        RecommendedItemsPage
-    </div>
-);
+class RecommendedItemsPage extends React.Component {
+    render() {
+        return (<ItemsList items={this.props.recommendedItems}/>);
+    }
+}
 
-export default RecommendedItemsPage
+function mapStateToProps(state) {
+    return {
+        recommendedItems: state.recommendedItems,
+    };
+}
+
+export default connect(mapStateToProps)(RecommendedItemsPage);

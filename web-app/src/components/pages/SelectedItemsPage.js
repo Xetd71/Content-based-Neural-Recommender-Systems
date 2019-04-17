@@ -1,9 +1,17 @@
 import React from 'react';
+import { connect } from 'react-redux';
+import ItemsList from '../controls/ItemsList'
 
-const SelectedItemsPage = () => (
-    <div>
-        SelectedItemsPage
-    </div>
-);
+class SelectedItemsPage extends React.Component {
+    render() {
+        return (<ItemsList items={this.props.userItems}/>);
+    }
+}
 
-export default SelectedItemsPage
+function mapStateToProps(state) {
+    return {
+        userItems: state.userItems,
+    };
+}
+
+export default connect(mapStateToProps)(SelectedItemsPage);
