@@ -51,7 +51,7 @@ class App extends Component {
     changeUser = (e) => {
         if(isNumber.test(e.target.value)) {
             const typedUserId = e.target.value === '' ? '' : Math.min(parseInt(e.target.value, 10), this.state.maxUserId);
-            this.props.setUserId(typedUserId === '' ? 0 : typedUserId);
+            this.props.setUserId(typedUserId === '' ? 0 : typedUserId, this.props.algorithm);
             this.setState({typedUserId: typedUserId});
         }
     };

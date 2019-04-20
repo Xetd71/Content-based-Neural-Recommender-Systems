@@ -21,9 +21,11 @@ export const userRecommendarionIssued = recommendedItems => ({
     recommendedItems
 });
 
-export const setUserId = (userId) => dispatch => {
+export const setUserId = (userId, algorithm) => dispatch => {
     dispatch(userIdChanged(userId));
     api.getUserItems(userId).then(userItems =>  dispatch(userItemsIssued(userItems)));
+    api.getRecommendation(userId, algorithm).then(
+        recommendedItems => dispatch(userRecommendarionIssued(recommendedItems)))
 };
 export const setAlgorithm = (userId, algorithm) => dispatch => {
     dispatch(algorithmChanged(algorithm));
