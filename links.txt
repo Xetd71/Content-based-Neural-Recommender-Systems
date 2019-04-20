@@ -1,3 +1,0 @@
-https://www.coursera.org/learn/machine-learning-applications-big-data/home/week/4
-https://events.yandex.ru/events/ds/16-feb-2019/
-https://ieeexplore.ieee.org/document/4781121 (ALS algorithm)

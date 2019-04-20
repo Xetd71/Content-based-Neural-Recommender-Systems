@@ -27,6 +27,6 @@ export const setUserId = (userId) => dispatch => {
 };
 export const setAlgorithm = (userId, algorithm) => dispatch => {
     dispatch(algorithmChanged(algorithm));
-    // api.getRecommendation(userId, algorithm).then(
-    //     recommendedItems => dispatch(userRecommendarionIssued(recommendedItems)));
+    api.getRecommendation(userId, algorithm).then(
+        recommendedItems => dispatch(userRecommendarionIssued(recommendedItems)));
 };

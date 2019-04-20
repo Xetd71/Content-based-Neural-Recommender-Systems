@@ -12,9 +12,14 @@ tokenizer = nltk.tokenize.WordPunctTokenizer()
 HOME_DIR = os.environ['HOME_DIR']
 DATA_DIR = f'{HOME_DIR}data/zen/'
 ZEN_IMAGE_SIZE = 96
+N_ITEMS = 10_000
+# 328050
+ALL_ITEM_IDS = set(np.arange(N_ITEMS))
+
 
 def tokenize(text):
-        return [t for t in tokenizer.tokenize(text.lower()) if len(t) >= 2]
+    return [t for t in tokenizer.tokenize(text.lower()) if len(t) >= 2]
+
 
 def utf8_preview(d):
     try:
@@ -74,13 +79,14 @@ class zen:
 
     @staticmethod
     def user_items(n=None, shuffle=True):
-        if shuffle:
-            def select_func(user):
-                items = user['userItems'][user['userRatings'] == 1]
+        def select_func(user):
+            items = user['userItems'][user['userRatings'] == 1]
+            if shuffle:
                 np.random.shuffle(items)
-                return items[:n]
-            return list(map(select_func, zen.users()))
-        return list(map(lambda user: user['userItems'][user['userRatings'] == 1][:n], zen.users()))
+            return items[:n], list(ALL_ITEM_IDS - set(items[:n]))+items[n:]
+            # items = items[:n]
+            # return items, list(ALL_ITEM_IDS - set(items))
+        return list(zip(*map(select_func, zen.users())))
 
     @staticmethod
     def __split_user(user):
