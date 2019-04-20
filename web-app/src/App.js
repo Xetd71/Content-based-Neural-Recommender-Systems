@@ -84,6 +84,7 @@ class App extends Component {
                                 <Dropdown text={algorithm ? 'Algorithm: ' + algorithm : 'Algorithm'} pointing className='link item'>
                                     <Dropdown.Menu>
                                         <Dropdown.Item name="ALS" onClick={this.selectAlgorithm}>ALS</Dropdown.Item>
+                                        <Dropdown.Item name="MLP" onClick={this.selectAlgorithm}>MLP</Dropdown.Item>
                                         <Dropdown.Item name="DSSM" onClick={this.selectAlgorithm}>DSSM</Dropdown.Item>
                                     </Dropdown.Menu>
                                 </Dropdown>
